@@ -1,0 +1,15 @@
+This extension provides a “Follow-Up” toolbar. When a user is unable to reply to an email at a time and wants to follow up on it later, all he needs to do is click on the follow up button. A dialog box pops up asking for a date for which the user wants to add a follow up reminder for. The user enters a date and clicks on the button. That’s all the user needs to do.
+
+The extension provides the following features:
+
+1) The email will appear in a different color in the inbox to visually differentiate it from the others.
+
+2) At any time the user can click on the view today button in the follow up toolbar to view those emails that he is supposed to reply by today. This way the user would be able to get rid of all the clutter and see what emails are awaiting his replies.
+
+3) The feature automatically keeps track of the current day and moves emails that were to be followed up at a previous date to the ‘pending’ group.
+
+4) The email appears in the user’s lightning calendar as an event. When the day arrives and the user logins he receives a popup window to remind him of the email to follow up.
+
+5) When the user has replied to the email, he can mark the follow up as done by clicking on the “Mark Done” button.
+
+This feature does not already exist in thunderbird. People who want to achieve this follow a lot of methods like using tags and adding manual reminders. The proposed extension serves for better user interaction and efficiency as it works by a click of two buttons. The rest of the process is undertaken automatically and the user does not have to care or know about it.
