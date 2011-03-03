@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>followup@amulya.com</em:id>
+    <em:type>2</em:type>
+    <em:name>Follow Up</em:name>
+    <em:version>1.0</em:version>
+    <em:creator>Amulya Khare</em:creator>
+    <em:contributor></em:contributor>
+    <em:description>This add-on provides a follow up feature for thunderbird. </em:description>
+    <em:aboutURL>chrome://follow_up_ext/content/about.xul</em:aboutURL>
+    <em:optionsURL>chrome://follow_up_ext/content/options.xul</em:optionsURL>
+    <em:targetApplication>
+      <Description>
+        <em:id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</em:id> <!-- Thunderbird -->
+        <em:minVersion>3.1</em:minVersion>
+        <em:maxVersion>3.3a3pre</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+  </Description>
+</RDF>

@@ -1,0 +1,7 @@
+content   follow_up_ext                 chrome/content/
+skin      follow_up_ext   classic/1.0   chrome/skin/
+locale    follow_up_ext   en-US         chrome/locale/en-US/
+
+style chrome://global/content/customizeToolbar.xul chrome://follow_up_ext/skin/overlay.css
+
+overlay chrome://messenger/content/messenger.xul chrome://follow_up_ext/content/button.xul

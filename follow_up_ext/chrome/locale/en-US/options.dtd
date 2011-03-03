@@ -1,0 +1,10 @@
+<!ENTITY prefwindow.title "Follow Up preferences">
+<!ENTITY pane1.title "Follow Up preferences">
+<!ENTITY taskboolpref.label "Task Item">
+<!ENTITY taskboolpref.accesskey "T">
+<!ENTITY eventboolpref.label "Calendar Event">
+<!ENTITY eventboolpref.accesskey "E">
+<!ENTITY intpref.label "An Integer Preference">
+<!ENTITY intpref.accesskey "I">
+<!ENTITY stringpref.label "A String Preference">
+<!ENTITY stringpref.accesskey "S">

@@ -1,0 +1,15 @@
+#custom-button-1,
+#wrapper-custom-button-1
+  {list-style-image: url("chrome://follow_up_ext/skin/follow_up.png");}
+  #custom-button-2,
+#wrapper-custom-button-2
+  {list-style-image: url("chrome://follow_up_ext/skin/mark_as_done.png");}
+  #custom-button-3,
+#wrapper-custom-button-3
+  {list-style-image: url("chrome://follow_up_ext/skin/view_follow_ups.png");}
+  #custom-button-4,
+#wrapper-custom-button-4
+  {list-style-image: url("chrome://follow_up_ext/skin/view_pending.png");}
+  #custom-button-5,
+#wrapper-custom-button-5
+  {list-style-image: url("chrome://follow_up_ext/skin/options.png");}
