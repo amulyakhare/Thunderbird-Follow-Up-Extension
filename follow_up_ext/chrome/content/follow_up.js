@@ -36,6 +36,14 @@ CustomButton = {
     if (params.out != null)
     {
         var date = params.out;
+        if(follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+        {
+            LightningEvent.createNewEvent(date);
+        }
+        else
+        {
+            LightningEvent.createNewTask(date);
+        }
         //create the tagname
         var d= "Follow Up: " +date.getDate().toString() +"/"+ (date.getMonth()+1) +"/"+ date.getFullYear().toString();
         if(!follow_up_ext.tagService.getKeyForTag(d))
@@ -70,6 +78,14 @@ CustomButton = {
                 var month = parseInt(dateString[1]) - 1;
                 var date = new Date(dateString[2],month,dateString[0]);
                 ToggleMessageTag (key, false);
+                if(follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+                {
+                    LightningEvent.removeAnEvent(date);
+                }
+                else
+                {
+                    LightningEvent.removeATask(date);
+                }
             }
         }
     }
@@ -175,6 +191,58 @@ CustomButton = {
 5: function () 
 {
     window.openDialog("chrome://follow_up_ext/content/options.xul","","window",null).focus();
+},
+/*This function shows all the pending and the mails to follow up*/
+6: function () 
+{
+    var all_count= 0;
+    var qfb = document.getElementById("qfb-show-filter-bar");
+    var qfb_status = qfb.checked;
+    if(!qfb_status)
+    {
+        qfb.click();
+    }
+    
+    var qfb_tag = document.getElementById("qfb-tags");
+    var qfb_tag_status = qfb_tag.checked;
+    if(!qfb_tag_status)
+    {
+        qfb_tag.click();
+    }
+    var allTags = follow_up_ext.tagService.getAllTags ({});
+    
+    setTimeout
+    (
+        function()
+        {
+            for (var i = 0; i < allTags.length; i++) 
+            {
+                var tagname = allTags[i].tag;
+                var initial = tagname.substring(0,10);
+                if (initial == "Pending Si" || initial == "Follow Up:")
+                {
+                    all_count++;
+                    var tagButton = document.getElementById("qfb-tag-"+allTags[i].key);
+                    tagButton.click();
+                }
+            }
+            if(all_count == 0)
+                {
+                    var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
+                    promptService.alert(null,"Follow Up", "You have no pending / follow up mails!");
+                    if(!qfb_tag_status)
+                    {
+                        qfb_tag.click();
+                    }
+                    if(!qfb_status)
+                    {
+                        qfb.click();
+                    }
+                }
+        },
+        1000
+    )
+
 }
 
 };

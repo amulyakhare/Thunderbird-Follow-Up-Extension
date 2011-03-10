@@ -1,5 +1,4 @@
-pref("extensions.follow_up_ext.taskpref", false);
-pref("extensions.follow_up_ext.eventpref", true);
+pref("extensions.follow_up_ext.calpref", 0);
 pref("extensions.follow_up_ext.cleanup", 0);
 pref("extensions.follow_up_ext.stringpref", "A string");
 

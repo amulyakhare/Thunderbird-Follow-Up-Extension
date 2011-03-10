@@ -4,21 +4,22 @@
 <prefwindow id="follow_up_ext-preferences" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="&prefwindow.title;">
   <prefpane id="pane1" label="&pane1.title;">
     <preferences>
-      <preference id="taskpref" name="extensions.follow_up_ext.taskpref" type="bool"/>
-      <preference id="eventpref" name="extensions.follow_up_ext.eventpref" type="bool"/>
+      <preference id="calpref" name="extensions.follow_up_ext.calpref" type="int"/>
       <preference id="cleanup" name="extensions.follow_up_ext.cleanup" type="int"/>
       <preference id="stringpref1" name="extensions.follow_up_ext.stringpref" type="string"/> <!-- note that this is only an ASCII string - use unichar for unicode strings -->
     </preferences>
     <groupbox>
     <caption label="Setup Reminder As:"/>
-    <checkbox id="taskboolpref" preference="taskpref" label="&taskboolpref.label;" accesskey="&taskboolpref.accesskey;"/>
-    <checkbox id="eventboolpref" preference="eventpref" label="&eventboolpref.label;" accesskey="&eventboolpref.accesskey;"/>
+    <radiogroup preference="calpref">
+    <radio value="0" label="&taskboolpref.label;"/>
+    <radio value="1" label="&eventboolpref.label;"/>
+    </radiogroup>
     </groupbox>
     <groupbox>
     <caption label="Cleanup Unused Flags:"/>
     <radiogroup preference="cleanup">
     <radio value="0" tooltiptext="Checks for cleanup each time the mark done button is clicked." label="Automatically"/>
-    <radio value="1" tooltiptext="Clenup manually as and when you want." label="Manually"/>
+    <radio value="1" tooltiptext="Cleanup manually as and when you want." label="Manually"/>
     </radiogroup>
     </groupbox>
   </prefpane>

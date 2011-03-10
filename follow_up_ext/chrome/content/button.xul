@@ -66,7 +66,7 @@
 
     <menupopup>
 	
-    <menuitem oncommand="alert('Not working!');"  label="Show All"/>
+    <menuitem oncommand="CustomButton[6]()"  label="Show All"/>
 	
     <menuitem oncommand="CustomButton[5]()" label="Preferences" />
 
