@@ -1,55 +1,71 @@
-var LightningEvent = {
-removeAnEvent:function(date)
-{
+var follow_up_calendar = {
 
-    var calendarManager = Components.classes["@mozilla.org/calendar/manager;1"].getService(Components.interfaces.calICalendarManager);
-    
-    var calendars = calendarManager.getCalendars({});
-    var calendar = calendars[0];
-    
-    var year = date.getFullYear();
+init : function()
+{
+	this.calendarManager = Components.classes["@mozilla.org/calendar/manager;1"].getService(Components.interfaces.calICalendarManager);
+},
+
+dateToStr : function(date)
+{
+	//get the year.
+	var year = date.getFullYear();
+    //get the month.
     var month = date.getMonth()+1;
     month += "";
     if (month.length == 1)
     {
         month = "0"+month;
     }
+    //get the date.
     var day = date.getDate();
     day += "";
     if (day.length == 1) 
     {
         day = "0"+day;
     }
-    var dateStr = year + "" + month + "" + day;	
+    //combine into a string.
+    var dateStr = year + "" + month + "" + day;
+    return dateStr;
+},
+
+removeAnEvent:function(date)
+{   
+    var calendars = this.calendarManager.getCalendars({});
+    var calendar = calendars[0];
+    var dateStr = this.dateToStr(date);
     
+    //retrieve the event from the calendar by using its id.
     var id= "Follow Up" + dateStr;
-    
     var tempEvent = this.retrieveEvent(id, calendar);
-    
+    //if no event found then just return.
     if(tempEvent == null)
     {
         return;
     }
+    
+    //else check the follow up count
     var count = parseInt(tempEvent.title.substring(11,12));
     var newEvent = Components.classes["@mozilla.org/calendar/event;1"].createInstance(Components.interfaces.calIEvent);
     newEvent.icalString = tempEvent.icalString;
     count -= 1;
+    //if this was the only follow up the it must be deleted.
     if(count == 0)
     {
         calendar.deleteItem(newEvent,null);
     }
+    //if 1 follow up remains then change text to singular "Email".
     else if(count == 1)
     {
         newEvent.title = "Follow Up: "+ count +" Email";
         calendar.modifyItem(newEvent,tempEvent,null);
     }
+    //if more that one follow ups remain then only the title needs to be changed.
     else
     {
         newEvent.title = "Follow Up: "+ count +" Emails";
         calendar.modifyItem(newEvent,tempEvent,null);
     }
-    return;
-    
+    return; 
 },
 removeATask:function(date)
 {
@@ -106,44 +122,25 @@ removeATask:function(date)
     return;
     
 },
+
 retrieveEvent: function(id,calendar)
 {
-    var listener = new LightningEvent.calOpListener();
-    
+    var listener = new follow_up_calendar.calOpListener();    
     calendar.getItem(id, listener);
-    
     return listener.mItems[0];
-    
 },
+
 createNewEvent:function(date)
 {
-    var calendarManager = Components.classes["@mozilla.org/calendar/manager;1"].getService(Components.interfaces.calICalendarManager);
-    
-    var calendars = calendarManager.getCalendars({});
+    var calendars = this.calendarManager.getCalendars({});
     var calendar = calendars[0];
+    var dateStr = this.dateToStr(date);
     
-    var year = date.getFullYear();
-    var month = date.getMonth()+1;
-    month += "";
-    if (month.length == 1)
-    {
-        month = "0"+month;
-    }
-    var day = date.getDate();
-    day += "";
-    if (day.length == 1) 
-    {
-        day = "0"+day;
-    }
-    var dateStr = year + "" + month + "" + day;	
-    
+    //get the event by using its id.
     var id= "Follow Up" + dateStr;
-    
-    //var listener = new LightningEvent.calOpListener();
-		
-    //alert(id+" searching");
     var tempEvent =  this.retrieveEvent(id,calendar);
     
+    //if such an event is found then we need to modify the existing one to accomodate the title change.
     if(tempEvent != null)
     {
         var count = parseInt(tempEvent.title.substring(11,12));
@@ -152,6 +149,7 @@ createNewEvent:function(date)
         count += 1;
         newEvent.title = "Follow Up: "+ count +" Emails";
         calendar.modifyItem(newEvent,tempEvent,null);
+        calendar.refresh();
         return;
     }
         
@@ -161,9 +159,7 @@ createNewEvent:function(date)
     iCalString += "SUMMARY:Test2345\n";
 		   
     // generate Date as Ical compatible text string
-    iCalString += "DTSTART;VALUE=DATE:" + dateStr + "\n";	
-    
-    //alert(dateStr);       
+    iCalString += "DTSTART;VALUE=DATE:" + dateStr + "\n";	    
                	   
     // set Duration
     iCalString += "DURATION=PT1D\n";
@@ -174,8 +170,6 @@ createNewEvent:function(date)
     // finalize iCalString
     iCalString += "END:VEVENT\n";
     iCalString += "END:VCALENDAR\n";
- 		   
-    //alert(iCalString);
 
     // create event Object out of iCalString
     var event = Components.classes["@mozilla.org/calendar/event;1"].createInstance(Components.interfaces.calIEvent);	
@@ -214,7 +208,7 @@ createNewTask:function(date)
     
     var id= "Follow Up" + dateStr;
     
-    //var listener = new LightningEvent.calOpListener();
+    //var listener = new follow_up_calendar.calOpListener();
 		
     //alert(id+" searching");
     var tempEvent =  this.retrieveEvent(id,calendar);
@@ -267,10 +261,10 @@ createNewTask:function(date)
     calendar.addItem(event, null);
 },
 };
-LightningEvent.calOpListener = function () 
+follow_up_calendar.calOpListener = function () 
 {
 }
-LightningEvent.calOpListener.prototype = {
+follow_up_calendar.calOpListener.prototype = {
       mItems: [],
       mDetail: null,
       mId: null,

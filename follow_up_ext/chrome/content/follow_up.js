@@ -1,3 +1,6 @@
+Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://gre/modules/FileUtils.jsm");
+	
  var follow_up_ext = {
   /*This function is called when the extension loads*/
   onLoad: function() 
@@ -5,6 +8,10 @@
     this.initialized = true;
 	this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
 	this.tagService = Components.classes["@mozilla.org/messenger/tagservice;1"].getService (Components.interfaces.nsIMsgTagService);
+	this.logFile = this.getLocalDirectory();
+	this.converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+	this.converter.charset = "UTF-8";
+	follow_up_calendar.init();
 	//set a timeout to prevent lag in loading.
 	setTimeout(
         
@@ -35,11 +42,11 @@
     	var date = params.out;
         if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
         {
-        	LightningEvent.createNewEvent(date);
+        	follow_up_calendar.createNewEvent(date);
         }
         else
         {
-        	LightningEvent.createNewTask(date);
+        	follow_up_calendar.createNewTask(date);
         }
         //create the tag.
         var d = "Follow Up: " + date.getDate().toString() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear().toString();
@@ -87,11 +94,11 @@
                 
                 if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
                 {
-                	LightningEvent.removeAnEvent(date);
+                	follow_up_calendar.removeAnEvent(date);
                 }
                 else
                 {
-                	LightningEvent.removeATask(date);
+                	follow_up_calendar.removeATask(date);
                 }
             }
         }
@@ -365,6 +372,41 @@
     }
     return false;
   },
+  
+  getLocalDirectory : function()
+  {
+  	let directoryService = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties);
+  	// this is a reference to the profile dir (ProfD) now.
+  	let localDir = directoryService.get("ProfD", Components.interfaces.nsIFile);
+
+  	localDir.append("follow_up_log.txt");
+
+  	if (!localDir.exists()) 
+  	{
+    	// read and write permissions to owner and group, read-only for others.
+    	localDir.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0774);
+  	}
+  	return localDir;	
+  },
+  
+  log : function(data)
+  {
+	var file = this.logFile;
+	//var ostream = FileUtils.openSafeFileOutputStream(file);
+	var ostream = Components.classes["@mozilla.org/network/file-output-stream;1"].createInstance(Components.interfaces.nsIFileOutputStream);
+	var istream = this.converter.convertToInputStream(data);
+	ostream.init(file, 0x02 | 0x08 | 0x10, 0666, 0); 
+	// The last argument (the callback) is optional.
+	NetUtil.asyncCopy(istream, ostream, function(status) 
+	{
+  		if (!Components.isSuccessCode(status)) 
+  		{
+    		// Handle error!
+    		return;
+  		}
+  		// Data has been written to the file.
+  	});
+  },
 };
 
 
@@ -373,6 +415,7 @@ follow_up_tb = {
 	/*Code for the click of the follow-up button. It calls the datepicker window, creates / adds the tag to the email*/
     1: function () 
     {
+    	//follow_up_ext.log("red,green,blue\nyellow,pink,black\n");
     	follow_up_ext.addFollowUp();
     },
 
