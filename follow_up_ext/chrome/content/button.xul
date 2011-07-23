@@ -11,6 +11,24 @@
   <script type="application/x-javascript"
   src="chrome://follow_up_ext/content/lightning.js"/>
 
+<!-- Commands -->
+<commandset>
+	<command id="cmd_add_follow_up" oncommand="follow_up_tb[1]()"/>
+	<command id="cmd_mark_done" oncommand="follow_up_tb[2]()"/>
+	<command id="cmd_view_today" oncommand="follow_up_tb[3]()"/>
+	<command id="cmd_view_pending" oncommand="follow_up_tb[4]()"/>
+	<command id="cmd_view_all" oncommand="follow_up_tb[6]()"/>
+</commandset>
+
+<!-- Keys -->
+<keyset>
+	<key id="add-follow-up-key" modifiers="accel alt" key="f;" command="cmd_add_follow_up"/>
+	<key id="mark-done-key" modifiers="accel alt" key="g;" command="cmd_mark_done"/>
+	<key id="view-today-key" modifiers="accel alt" key="w;" command="cmd_view_today"/>
+	<key id="view-pending-key" modifiers="accel alt" key="r;" command="cmd_view_pending"/>
+	<key id="view-all-key" modifiers="accel alt" key="e;" command="cmd_view_all"/>
+</keyset> 
+
 <!-- Thunderbird mail -->
 <toolbarpalette id="MailToolbarPalette">
   <toolbarbutton id="custom-button-1"/>
@@ -24,7 +42,8 @@
 <toolbarbutton id="custom-button-1"
   label="Follow Up"
   tooltiptext="Follow up later"
-  oncommand="CustomButton[1]()"
+  command="cmd_add_follow_up"
+  key="add-follow-up-key"
   class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
   />
   
@@ -35,7 +54,8 @@
 
   tooltiptext="Mark as done"
 
-  oncommand="CustomButton[2]()"
+  command="cmd_mark_done"
+   key="mark-done-key"
 
   class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
   />
@@ -46,7 +66,8 @@
 	label="View Today"
 	tooltiptext="View emails to follow up today"
   
-	oncommand="CustomButton[3]()"
+	command="cmd_view_today"
+    key="view-today-key"
   
 	class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
   />
@@ -56,8 +77,9 @@
 	label="View Pending"
 	tooltiptext="View Pending Follow Ups"
   
-	oncommand="CustomButton[4]()"
-  
+	command="cmd_view_pending"
+
+   	key="view-pending-key"  
 	class="toolbarbutton-1 chromeclass-toolbar-additional custombutton"
   />
   
@@ -66,9 +88,9 @@
 
     <menupopup>
 	
-    <menuitem oncommand="CustomButton[6]()"  label="Show All"/>
+    <menuitem command="cmd_view_all"  label="Show All" key="view-all-key"/>
 	
-    <menuitem oncommand="CustomButton[5]()" label="Preferences" />
+    <menuitem oncommand="follow_up_tb[5]()" label="Preferences" />
 
 		 <menuitem oncommand="clearUnusedTags()" label="Clean Up" />
 	 </menupopup>
