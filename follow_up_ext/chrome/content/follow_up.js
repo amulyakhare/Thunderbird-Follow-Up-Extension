@@ -8,6 +8,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
     this.initialized = true;
 	this.prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
 	this.tagService = Components.classes["@mozilla.org/messenger/tagservice;1"].getService (Components.interfaces.nsIMsgTagService);
+	this. promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
 	this.logFile = this.getLocalDirectory();
 	this.converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
 	this.converter.charset = "UTF-8";
@@ -32,6 +33,8 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
   */
   addFollowUp: function()
   {
+  	if(this.isMessageSelected() == false)
+  		return;
   	//open the datepicker window.
   	var params = { out: null };
     window.openDialog("chrome://follow_up_ext/content/date_dialog.xul", "", "modal", params).focus();
@@ -40,6 +43,29 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
     if (params.out != null) 
     {
     	var date = params.out;
+    	//create the tag.
+        var d;
+        if(this.isValidDate(date) == true)
+    	{
+    		d = "Follow Up: " + date.getDate().toString() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear().toString();
+    		if (!follow_up_ext.tagService.getKeyForTag(d))
+        	{
+        		follow_up_ext.tagService.addTag(d, "#33CC00", "");
+        	}
+    	}
+    	else
+    	{
+    		d = "Pending Since: " + date.getDate().toString() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear().toString();
+    		if (!follow_up_ext.tagService.getKeyForTag(d))
+        	{
+        		follow_up_ext.tagService.addTag(d, "#FF0000", "");
+        	}
+    	}
+        
+        //add the tag to the email.
+        ToggleMessageTag(follow_up_ext.findTagKey(d), true);
+        
+        //create event / task in the calendar.
         if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
         {
         	follow_up_calendar.createNewEvent(date);
@@ -48,21 +74,9 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
         {
         	follow_up_calendar.createNewTask(date);
         }
-        //create the tag.
-        var d = "Follow Up: " + date.getDate().toString() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear().toString();
-        if (!follow_up_ext.tagService.getKeyForTag(d))
-        {
-        	follow_up_ext.tagService.addTag(d, "#33CC00", "");
-        }
-        //add the tag to the email.
-        ToggleMessageTag(follow_up_ext.findTagKey(d), true);
     }
   },
   
-  /*
-  This function marks done ALL the follow up tags set for that email. 
-  It also removes / modifies the event / task associated with that tag.
-  */
   markDone: function()
   {
   	//get all the tags existing in Thunderbird.
@@ -137,8 +151,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
             //if no such tag element is found.
             if (tagButton == null) 
             {
-                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
-                promptService.alert(null, "Follow Up", "You have no mails to follow up!");
+                this.promptService.alert(null, "Follow Up", "You have no mails to follow up!");
                 ////reset the button state.
                 if (!qfb_tag_status)
                 {
@@ -197,8 +210,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
             //if no pending tags found then we just display a popup message.
             if (pending_count == 0) 
             {
-                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
-                promptService.alert(null, "Follow Up", "You have no pending mails!");
+                this.promptService.alert(null, "Follow Up", "You have no pending mails!");
                 //reset the qfb state.
                 if (!qfb_tag_status)
                 {
@@ -256,8 +268,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
             //if no tags are found simply display a message.
             if (all_count == 0)
             {
-                var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
-                promptService.alert(null, "Follow Up", "You have no pending / follow up mails!");
+                this.promptService.alert(null, "Follow Up", "You have no pending / follow up mails!");
                 if (!qfb_tag_status) 
                 {
                     qfb_tag.click();
@@ -301,6 +312,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
                 key = allTags[i].key;
                 follow_up_ext.tagService.setTagForKey(key, "Pending Since: " + tagname.substring(11));
                 follow_up_ext.tagService.setColorForKey(key, "#FF0000");
+                //also update events to pending.
             }
         }
     }
@@ -355,6 +367,28 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
     }, 1000)
   },
   
+  isMessageSelected : function()
+  {
+  	try
+  	{
+  		var msgHdr = gDBView.hdrForFirstSelectedMessage;
+    }
+    catch (e)
+    {
+    	return false;
+    }
+    return true;
+  },
+  isValidDate : function(date)
+  {
+  	var yesterday = new Date();
+  	yesterday.setDate(yesterday.getDate()-1);
+  	if(date < yesterday)
+  	{
+  		return false;
+  	}
+  	return true;
+  },
   /*This functions checks if the date is older than todays date and returns true if it is so*/
   compareWithToday : function(dateRef) 
   {
