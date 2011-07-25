@@ -12,7 +12,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	this.logFile = this.getLocalDirectory();
 	this.converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
 	this.converter.charset = "UTF-8";
-	follow_up_calendar.init();
+	
 	//set a timeout to prevent lag in loading.
 	setTimeout(
         
@@ -52,6 +52,8 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
         	{
         		follow_up_ext.tagService.addTag(d, "#33CC00", "");
         	}
+        	ToggleMessageTag(follow_up_ext.findTagKey(d), true);
+        	this.addItemtoCalendar(date,follow_up_calendar.FOLLOWUP);
     	}
     	else
     	{
@@ -60,20 +62,22 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
         	{
         		follow_up_ext.tagService.addTag(d, "#FF0000", "");
         	}
+        	ToggleMessageTag(follow_up_ext.findTagKey(d), true);
+        	this.addItemtoCalendar(date,follow_up_calendar.PENDING);
     	}
-        
-        //add the tag to the email.
-        ToggleMessageTag(follow_up_ext.findTagKey(d), true);
-        
-        //create event / task in the calendar.
-        if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
-        {
-        	follow_up_calendar.createNewEvent(date);
-        }
-        else
-        {
-        	follow_up_calendar.createNewTask(date);
-        }
+    }
+  },
+  
+  addItemtoCalendar : function(date,status)
+  {
+  	//create event / task in the calendar.
+    if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+    {
+        follow_up_calendar.addEvent(date,status);
+    }
+    else
+    {
+        follow_up_calendar.createNewTask(date,status);
     }
   },
   
@@ -81,20 +85,18 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
   {
   	//get all the tags existing in Thunderbird.
   	var allTags = follow_up_ext.tagService.getAllTags({});
-	
+  	var msgHdr = gDBView.hdrForFirstSelectedMessage;
+    var curKeys = msgHdr.getStringProperty("keywords");
+        	
 	//loop through all the tags
 	for (var i = 0; i < allTags.length; i++) 
 	{
 		var tagname = allTags[i].tag;
-		
+		key = allTags[i].key;
 		//check if it is a follow up or pending tag.
         var initial = tagname.substring(0, 10);
-        if (initial == "Follow Up:" || initial == "Pending Si") 
+        if (initial == "Follow Up:") 
         {
-        	key = allTags[i].key;
-        	var msgHdr = gDBView.hdrForFirstSelectedMessage;
-        	var curKeys = msgHdr.getStringProperty("keywords");
-        	
         	//if message has this particular tag.
         	if (curKeys.indexOf(key) != -1)
         	{
@@ -105,17 +107,37 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
                 
                 //remove the tag from the email.
                 ToggleMessageTag(key, false);
+                this.removeItemfromCalendar(date,follow_up_calendar.FOLLOWUP);
+            }
+            
+        }
+        if (initial == "Pending Si")
+        {
+        	//if message has this particular tag.
+        	if (curKeys.indexOf(key) != -1)
+        	{
+        		//extract the date of this tag.
+        		var dateString = allTags[i].tag.substring(14).split("/");
+        		var month = parseInt(dateString[1]) - 1;
+        		var date = new Date(dateString[2], month, dateString[0]);
                 
-                if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
-                {
-                	follow_up_calendar.removeAnEvent(date);
-                }
-                else
-                {
-                	follow_up_calendar.removeATask(date);
-                }
+                //remove the tag from the email.
+                ToggleMessageTag(key, false);
+                this.removeItemfromCalendar(date,follow_up_calendar.PENDING);
             }
         }
+    }
+  },
+  
+  removeItemfromCalendar : function(date,status)
+  {
+  	if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+    {
+    	follow_up_calendar.removeEvent(date,status);
+    }
+    else
+    {
+    	follow_up_calendar.removeATask(date);
     }
   },
   
@@ -481,4 +503,4 @@ follow_up_tb = {
     },
 
 };   
-window.addEventListener("load", function () { follow_up_ext.onLoad(); }, false);
+window.addEventListener("load", function () { follow_up_ext.onLoad(); follow_up_calendar.init(); }, false);
