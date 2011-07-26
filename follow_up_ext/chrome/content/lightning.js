@@ -65,7 +65,7 @@ removeEvent:function(date,status)
 
     //retrieve the event from the calendar by using its id.
     var id= status + dateStr;
-    var tempEvent = this.retrieveEvent(id, this.calendar);
+    var tempEvent = this.retrieveItem(id, this.calendar);
     //if no event found then just return.
     if(tempEvent != null)
     {
@@ -74,63 +74,23 @@ removeEvent:function(date,status)
     
     return; 
 },
-removeATask:function(date)
+
+removeTask:function(date,status)
 {
+    var dateStr = this.dateToStr(date);
 
-    var calendarManager = Components.classes["@mozilla.org/calendar/manager;1"].getService(Components.interfaces.calICalendarManager);
-    
-    var calendars = calendarManager.getCalendars({});
-    var calendar = calendars[0];
-    
-    var year = date.getFullYear();
-    var month = date.getMonth()+1;
-    month += "";
-    if (month.length == 1)
+    //retrieve the event from the calendar by using its id.
+    var id= status + dateStr;
+    var tempTask = this.retrieveItem(id, this.calendar);
+    //if no event found then just return.
+    if(tempTask != null)
     {
-        month = "0"+month;
+    	this.modifyCalendarTask(tempTask,-1,status);
     }
-    var day = date.getDate();
-    day += "";
-    if (day.length == 1) 
-    {
-        day = "0"+day;
-    }
-    var dateStr = year + "" + month + "" + day;	
-    
-    var id= "Follow Up" + dateStr;
-    
-    var tempEvent = this.retrieveEvent(id, calendar);
-    
-    if(tempEvent == null)
-    {
-        return;
-    }
-    var count = parseInt(tempEvent.title.substring(11,12));
-    count -= 1;
-    if(count == 0)
-    {
-        calendar.deleteItem(tempEvent,null);
-        return;
-    }
-
-    var newEvent = Components.classes["@mozilla.org/calendar/todo;1"].createInstance(Components.interfaces.calITodo);
-    newEvent.icalString = tempEvent.icalString;
-    
-    if(count == 1)
-    {
-        newEvent.title = "Follow Up: "+ count +" Email";
-        calendar.modifyItem(newEvent,tempEvent,null);
-    }
-    else
-    {
-        newEvent.title = "Follow Up: "+ count +" Emails";
-        calendar.modifyItem(newEvent,tempEvent,null);
-    }
-    return;
-    
+    return;    
 },
 
-retrieveEvent: function(id,calendar)
+retrieveItem: function(id,calendar)
 {
     var listener = new follow_up_calendar.calOpListener();    
     calendar.getItem(id, listener);
@@ -139,12 +99,37 @@ retrieveEvent: function(id,calendar)
 
 setEventToPending : function(date)
 {
-	var id = "Pending Since" + this.dateToStr(date);
-	var tempEvent =  this.retrieveEvent(id,this.calendar);
+	var dateStr = this.dateToStr(date);
+	var id = this.FOLLOWUP + dateStr;
+	var tempEvent =  this.retrieveItem(id,this.calendar);
     
     //if such an event is found then we need to modify the existing one to accomodate the title change.
     if(tempEvent != null)
     {
+    	var newEvent = Components.classes["@mozilla.org/calendar/event;1"].createInstance(Components.interfaces.calIEvent);
+   		newEvent.icalString = tempEvent.icalString;
+    	newEvent.calendar = this.calendar;
+    	newEvent.title = this.PENDING + ": "+ tempEvent.title.substring(11);
+    	newEvent.id = this.PENDING + dateStr;
+    	this.calendar.modifyItem(newEvent,tempEvent,null);
+    }
+},
+
+setTaskToPending : function(date)
+{
+	var dateStr = this.dateToStr(date);
+	var id = this.FOLLOWUP + dateStr;
+	var tempTask =  this.retrieveItem(id,this.calendar);
+    
+    //if such an event is found then we need to modify the existing one to accomodate the title change.
+    if(tempTask != null)
+    {
+    	var newTask = Components.classes["@mozilla.org/calendar/todo;1"].createInstance(Components.interfaces.calITodo);
+   		newTask.icalString = tempTask.icalString;
+    	newTask.calendar = this.calendar;
+    	newTask.title = this.PENDING + ": "+ tempTask.title.substring(11);
+    	newTask.id = this.PENDING + dateStr;
+    	this.calendar.modifyItem(newTask,tempTask,null);
     }
 },
 
@@ -154,7 +139,7 @@ addEvent : function(date,status)
 	
 	//get the event by using its id.
     var id= status + dateStr;
-    var tempEvent =  this.retrieveEvent(id,this.calendar);
+    var tempEvent =  this.retrieveItem(id,this.calendar);
 
     //if such an event is found then we need to modify the existing one to accomodate the title change.
     if(tempEvent != null)
@@ -229,6 +214,86 @@ modifyCalendarEvent : function(tempEvent,unit,status)
     return;
 },
 
+modifyCalendarTask : function(tempTask,unit,status)
+{
+	var count;
+	if(status == this.PENDING)
+	{
+		count = parseInt(tempTask.title.substring(9,10));
+	}
+	else
+	{
+		count = parseInt(tempTask.title.substring(11,12));
+    }
+    var newTask = Components.classes["@mozilla.org/calendar/todo;1"].createInstance(Components.interfaces.calITodo);
+    newTask.icalString = tempTask.icalString;
+    newTask.calendar = this.calendar;
+    count = count + unit;
+    //if this was the only follow up the it must be deleted.
+    if(count == 0)
+    {
+        this.calendar.deleteItem(tempTask,null);
+    }
+    //if 1 follow up remains then change text to singular "Email".
+    else if(count == 1)
+    {
+        newTask.title = status + ": "+ count +" Email";
+        this.calendar.modifyItem(newTask,tempTask,null);
+    }
+    //if more that one follow ups remain then only the title needs to be changed.
+    else
+    {
+        newTask.title = status + ": "+ count +" Emails";
+    	this.calendar.modifyItem(newTask,tempTask,null);
+    }
+    return;
+},
+
+
+addTask : function(date,status)
+{
+	var dateStr = this.dateToStr(date);
+	var id= status + dateStr;
+	
+	var tempTask =  this.retrieveItem(id,this.calendar);
+    
+    //if a task exists.
+    if(tempTask != null)
+    {
+    	this.modifyCalendarTask(tempTask,1,status);
+    	return;
+    }
+    
+     // Strategy is to create iCalString and create task from that string
+    var iCalString = "BEGIN:VCALENDAR\n";
+    iCalString += "BEGIN:VTODO\n";
+    iCalString += "SUMMARY:Test2345\n";
+		   
+    // generate Date as Ical compatible text string
+    iCalString += "DTSTART;VALUE=DATE:" + dateStr + "\n";
+    iCalString += "DUE;VALUE=DATE:" + dateStr + "\n";	
+		   
+    // set Alarm
+    iCalString += "BEGIN:VALARM\nACTION:DISPLAY\nTRIGGER:-PT" + "1" + "M\nEND:VALARM\n";
+    
+    // finalize iCalString
+    iCalString += "END:VTODO\n";
+    iCalString += "END:VCALENDAR\n";
+
+    // create event Object out of iCalString
+    var task = Components.classes["@mozilla.org/calendar/todo;1"].createInstance(Components.interfaces.calITodo);	
+    task.icalString = iCalString;
+
+    // set Title (Summary) 					  		   
+    task.title = status + ": 1 Email";
+		
+    // set ID
+    task.id=id;
+        
+    // add Item to Calendar
+    this.calendar.addItem(task, null);
+},
+
 createNewTask:function(date)
 {
     var calendarManager = Components.classes["@mozilla.org/calendar/manager;1"].getService(Components.interfaces.calICalendarManager);
@@ -256,7 +321,7 @@ createNewTask:function(date)
     //var listener = new follow_up_calendar.calOpListener();
 		
     //alert(id+" searching");
-    var tempEvent =  this.retrieveEvent(id,calendar);
+    var tempEvent =  this.retrieveItem(id,calendar);
     
     if(tempEvent != null)
     {

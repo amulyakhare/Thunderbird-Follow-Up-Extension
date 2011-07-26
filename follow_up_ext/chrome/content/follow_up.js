@@ -22,7 +22,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
 			follow_up_ext.setPendingTags();
 			//clear those tags which are no longer used.
     
-			//follow_up_ext.clearUnusedTags();
+			follow_up_ext.clearUnusedTags();
         },1000)
   },
   
@@ -77,7 +77,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
     }
     else
     {
-        follow_up_calendar.createNewTask(date,status);
+        follow_up_calendar.addTask(date,status);
     }
   },
   
@@ -137,7 +137,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
     }
     else
     {
-    	follow_up_calendar.removeATask(date);
+    	follow_up_calendar.removeTask(date,status);
     }
   },
   
@@ -334,7 +334,21 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
                 key = allTags[i].key;
                 follow_up_ext.tagService.setTagForKey(key, "Pending Since: " + tagname.substring(11));
                 follow_up_ext.tagService.setColorForKey(key, "#FF0000");
-                //also update events to pending.
+                
+                //extract the date of this tag.
+        		var dateString = allTags[i].tag.substring(11).split("/");
+        		var month = parseInt(dateString[1]) - 1;
+        		var date = new Date(dateString[2], month, dateString[0]);
+        		
+        		//also update events to pending.
+        		if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+    			{
+			        follow_up_calendar.setEventToPending(date);
+			    }
+			    else
+			    {
+			        follow_up_calendar.setTaskToPending(date);
+			    }	
             }
         }
     }
@@ -478,7 +492,9 @@ follow_up_tb = {
     /*This is the mark as done function. It marks done ALL the follow up tags set for that email. it also calls the remove unused tag function*/
     2: function ()
     {
-    	follow_up_ext.markDone();
+    	//follow_up_ext.markDone();
+    	var params = { out: null };
+    	window.openDialog("chrome://follow_up_ext/content/setup_wizard.xul", "", "modal", params).focus();
     },
     /*This is the function on the View today click.*/
     3: function () 
