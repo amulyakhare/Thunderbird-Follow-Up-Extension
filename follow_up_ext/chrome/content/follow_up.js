@@ -12,7 +12,9 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	this.logFile = this.getLocalDirectory();
 	this.converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
 	this.converter.charset = "UTF-8";
-	
+	//add to log
+	this.logDate = new Date();
+	follow_up_ext.log(follow_up_ext.logDate+",loaded\n");
 	//set a timeout to prevent lag in loading.
 	setTimeout(
         
@@ -20,9 +22,6 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
 		{
 			//set overdue tags as pending.
 			follow_up_ext.setPendingTags();
-			//clear those tags which are no longer used.
-    
-			follow_up_ext.clearUnusedTags();
         },1000)
   },
   
@@ -36,9 +35,9 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
   	if(this.isMessageSelected() == false)
   		return;
   	//open the datepicker window.
+  	follow_up_ext.log(follow_up_ext.logDate+",Add Follow Up BEGIN\n");
   	var params = { out: null };
     window.openDialog("chrome://follow_up_ext/content/date_dialog.xul", "", "modal", params).focus();
-    
     //if a date was selected by the user.
     if (params.out != null) 
     {
@@ -66,23 +65,29 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
         	this.addItemtoCalendar(date,follow_up_calendar.PENDING);
     	}
     }
+    follow_up_ext.log(follow_up_ext.logDate+",Add Follow Up END\n");
   },
   
   addItemtoCalendar : function(date,status)
   {
   	//create event / task in the calendar.
-    if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+    if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 0)
     {
+    	follow_up_ext.log(follow_up_ext.logDate+",Add Event BEGIN\n");
         follow_up_calendar.addEvent(date,status);
+        follow_up_ext.log(follow_up_ext.logDate+",Add Event END\n");
     }
     else
     {
+    	follow_up_ext.log(follow_up_ext.logDate+",Add Task BEGIN\n");
         follow_up_calendar.addTask(date,status);
+        follow_up_ext.log(follow_up_ext.logDate+",Add Task END\n");
     }
   },
   
   markDone: function()
   {
+  	follow_up_ext.log(follow_up_ext.logDate+",Mark Done BEGIN\n");
   	//get all the tags existing in Thunderbird.
   	var allTags = follow_up_ext.tagService.getAllTags({});
   	var msgHdr = gDBView.hdrForFirstSelectedMessage;
@@ -127,17 +132,22 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
             }
         }
     }
+    follow_up_ext.log(follow_up_ext.logDate+",Mark Done END\n");
   },
   
   removeItemfromCalendar : function(date,status)
   {
-  	if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+  	if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 0)
     {
+    	follow_up_ext.log(follow_up_ext.logDate+",Remove Event BEGIN\n");
     	follow_up_calendar.removeEvent(date,status);
+    	follow_up_ext.log(follow_up_ext.logDate+",Remove Event END\n");
     }
     else
     {
+    	follow_up_ext.log(follow_up_ext.logDate+",Remove Task BEGIN\n");
     	follow_up_calendar.removeTask(date,status);
+    	follow_up_ext.log(follow_up_ext.logDate+",Remove Task END\n");
     }
   },
   
@@ -322,6 +332,7 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
   /*This function checks for all flags that are overdue and changes them to pending*/
   setPendingTags : function()
   {
+  	follow_up_ext.log(follow_up_ext.logDate+",Set Pending BEGIN\n");
   	var allTags = follow_up_ext.tagService.getAllTags({});
     for (var i = 0; i < allTags.length; i++) 
     {
@@ -341,17 +352,22 @@ Components.utils.import("resource://gre/modules/FileUtils.jsm");
         		var date = new Date(dateString[2], month, dateString[0]);
         		
         		//also update events to pending.
-        		if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 1)
+        		if (follow_up_ext.prefs.getIntPref("extensions.follow_up_ext.calpref") == 0)
     			{
+    				follow_up_ext.log(follow_up_ext.logDate+",Set Event Pending BEGIN\n");
 			        follow_up_calendar.setEventToPending(date);
+			        follow_up_ext.log(follow_up_ext.logDate+",Set Event Pending END\n");
 			    }
 			    else
 			    {
+			    	follow_up_ext.log(follow_up_ext.logDate+",Set Task Pending BEGIN\n");
 			        follow_up_calendar.setTaskToPending(date);
+			        follow_up_ext.log(follow_up_ext.logDate+",Set Task Pending END\n");
 			    }	
             }
         }
     }
+    follow_up_ext.log(follow_up_ext.logDate+",Set Pending END\n");
   },
   
   /*This function clears unused follow-up / pending tags that are no longer attached to any emails*/
@@ -485,16 +501,30 @@ follow_up_tb = {
 	/*Code for the click of the follow-up button. It calls the datepicker window, creates / adds the tag to the email*/
     1: function () 
     {
-    	//follow_up_ext.log("red,green,blue\nyellow,pink,black\n");
-    	follow_up_ext.addFollowUp();
+    	follow_up_ext.log(follow_up_ext.logDate+",Add Follow Up CLICK\n");
+    	var calName = follow_up_ext.prefs.getCharPref("extensions.follow_up_ext.calname");
+		if(calName == "")
+		{
+			follow_up_ext.log(follow_up_ext.logDate+",Setup Wizard BEGIN\n");
+			var params = { out: null };
+    		window.openDialog("chrome://follow_up_ext/content/setup_wizard.xul", "", "modal", params).focus();
+    		if(params.out != null)
+    		{
+    			follow_up_calendar.addFollowUpCalendar();
+    			follow_up_ext.prefs.setIntPref("extensions.follow_up_ext.calpref",params.out);
+    			follow_up_ext.log(follow_up_ext.logDate+",Setup Wizard COMPLETED\n");
+    		}
+		}
+		else
+		{
+    		follow_up_ext.addFollowUp();
+    	}
     },
 
     /*This is the mark as done function. It marks done ALL the follow up tags set for that email. it also calls the remove unused tag function*/
     2: function ()
     {
-    	//follow_up_ext.markDone();
-    	var params = { out: null };
-    	window.openDialog("chrome://follow_up_ext/content/setup_wizard.xul", "", "modal", params).focus();
+    	follow_up_ext.markDone();
     },
     /*This is the function on the View today click.*/
     3: function () 

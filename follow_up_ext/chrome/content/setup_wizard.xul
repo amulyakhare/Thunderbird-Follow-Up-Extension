@@ -2,11 +2,14 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 
 <wizard id="setup-wizard" title="Setup Follow Up" xmlns:html="http://www.w3.org/1999/xhtml"
-  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" onwizardfinish="return follow_up_setupwizard.setupComplete();">
+  
+  <script type="application/javascript" src="chrome://follow_up_ext/content/setup_wizard.js"/>
+  <script type="application/javascript" src="chrome://follow_up_ext/content/lightning.js"/>
+  
   <wizardpage title="Setup">
     <spacer flex="1"/>
-    <label>This one-time wizard will guide you through the setup of the follow-up extension. Click continue to proceed.</label>
+    <label>This one-time wizard will guide you through the setup of the follow-up extension.</label>
     <spacer flex="2"/>
   </wizardpage>
 
@@ -18,7 +21,7 @@
     	<radio value="default" label="Default"/>
     </radiogroup>
     <spacer flex="2"/>
-    <label>Note: By default it will create a new calendar 'Follow-Up'. If you rename this calendar or delete it the extension will fail to work.</label>
+    <label>Note: By default it will create a new calendar 'Follow-Up'. If you rename or delete this calendar, the extension will fail to work.</label>
     <spacer flex="1"/>
   </wizardpage>
   
@@ -26,7 +29,7 @@
   <description>
       Select whether you want follow ups to be created as events or task items:
     </description>
-    <radiogroup>
+    <radiogroup id="calItem">
     	<radio value="0" label="Event"/>
     	<radio value="1" label="Task"/>
     </radiogroup>
@@ -34,48 +37,4 @@
     <label>Note: You can change this later in the preferences however any follow ups that already exist will not be copied over from one type to the other.</label>
     <spacer flex="1"/>
   </wizardpage>
-	
-  <wizardpage>
-    <label class="header">You can drag and drop buttons buttons to the toolbar:</label><label class="indent"> View -> Toolbars -> Customize</label>
-    <spacer flex="1"/>
-    <label class="header">You can use the following shortcuts:</label>
-    <html:table html:style="border-spacing: 10px;" width="350px">
-  	<html:tr>
-  		<html:td width="10">
-      		
-    	</html:td>
-    	<html:td width="100">
-      		Follow Up
-    	</html:td>
-    	<html:td>
-      		Key combnation + F
-    	</html:td>
-  	</html:tr>
-  	<html:tr>
-  		<html:td>
-    	</html:td>
-    	<html:td>
-      		Mark Done
-    	</html:td>
-    	<html:td>
-      		Key combnation + G
-    	</html:td>
-  	</html:tr>
-	</html:table>
-    <spacer flex="1"/>
-    <label class="header">Key Combination</label>
-    <html:table width="350px">
-  	<html:tr>
-  		<html:td>
-      		<label class="indent">Mac : Cmd + Opt</label>
-    	</html:td>
-    	<html:td>
-    		<label>Win : Ctrl + Alt</label>
-    	</html:td>
-    </html:tr>
-    </html:table>
-    
-    <spacer flex="1"/>
-  </wizardpage>
-
 </wizard>

@@ -6,12 +6,7 @@ init : function()
 	var calendars = this.calendarManager.getCalendars({});
 	
 	var calName = follow_up_ext.prefs.getCharPref("extensions.follow_up_ext.calname");
-	if(calName == "")
-	{
-		alert("if");
-		follow_up_calendar.addFollowUpCalendar();
-	}
-	else
+	if(calName != "")
 	{
 		for(i=0;i<calendars.length;i++)
 		{
@@ -30,7 +25,7 @@ addFollowUpCalendar : function()
 {
 	var ioSvc = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
     var temp = this.calendarManager.createCalendar("storage",ioSvc.newURI("moz-profile-calendar://", null, null));
-	temp.name = "Follow-Up";
+    temp.name = "Follow-Up";
 	this.calendarManager.registerCalendar(temp);
 	follow_up_ext.prefs.setCharPref("extensions.follow_up_ext.calname",temp.name);
 	this.calendar = temp;

@@ -92,7 +92,7 @@
 	
     <menuitem oncommand="follow_up_tb[5]()" label="Preferences" />
 
-		 <menuitem oncommand="clearUnusedTags()" label="Clean Up" />
+		 <menuitem oncommand="follow_up_ext.clearUnusedTags()" label="Clean Up" />
 	 </menupopup>
 </toolbarbutton>
 

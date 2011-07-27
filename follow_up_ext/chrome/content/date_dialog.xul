@@ -5,8 +5,8 @@
    buttons="accept,cancel"
    buttonlabelcancel="Cancel"
    buttonlabelaccept="Save"
-   ondialogaccept="return doOK();"
-   ondialogcancel="return doCancel();">
+   ondialogaccept="return follow_up_datedialog.doOK();"
+   ondialogcancel="return follow_up_datedialog.doCancel();">
    
    <script type="application/javascript" src="chrome://follow_up_ext/content/date_dialog.js"/>
     
