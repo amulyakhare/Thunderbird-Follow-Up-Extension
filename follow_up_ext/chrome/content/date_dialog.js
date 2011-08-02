@@ -9,4 +9,4 @@ doCancel : function()
 {
   return true;
 },
-}
+};

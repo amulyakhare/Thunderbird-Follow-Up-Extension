@@ -18,6 +18,7 @@
 	<command id="cmd_view_today" oncommand="follow_up_tb[3]()"/>
 	<command id="cmd_view_pending" oncommand="follow_up_tb[4]()"/>
 	<command id="cmd_view_all" oncommand="follow_up_tb[6]()"/>
+	<command id="cmd_clean_unused" oncommand="follow_up_ext.clearUnusedTags()"/>
 </commandset>
 
 <!-- Keys -->
@@ -92,8 +93,18 @@
 	
     <menuitem oncommand="follow_up_tb[5]()" label="Preferences" />
 
-		 <menuitem oncommand="follow_up_ext.clearUnusedTags()" label="Clean Up" />
+		 <menuitem command="cmd_clean_unused" label="Clean Up" />
 	 </menupopup>
 </toolbarbutton>
 
+<!-- menu items -->
+<menupopup id="mailContext">
+	<menu id="follow-up-menu" label="Follow Up">
+          <menupopup id="follow-up-popup">
+            <menuitem id="add-menu" label="Add Follow Up" key="add-follow-up-key" command="cmd_add_follow_up"/>
+            <menuitem id="done-menu" label="Mark Done" key="mark-done-key" command="cmd_mark_done"/>
+            <menuitem id="clean-menu" label="Clean Unsued Tags" command="cmd_clean_unused"/>
+          </menupopup>
+        </menu>
+</menupopup>
 </overlay>

@@ -6,4 +6,4 @@ var follow_up_setupwizard =
 		window.arguments[0].out = document.getElementById("calItem").selectedIndex;
 		return true;
 	},
-}
+};

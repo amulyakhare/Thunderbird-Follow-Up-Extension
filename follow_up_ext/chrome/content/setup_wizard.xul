@@ -37,4 +37,17 @@
     <label>Note: You can change this later in the preferences however any follow ups that already exist will not be copied over from one type to the other.</label>
     <spacer flex="1"/>
   </wizardpage>
+  
+  <wizardpage label="Step 3">
+  <description>
+     Take note of the following:
+    </description>
+    <spacer flex="1"/>
+    <label>1.) Right clicking on any message will allow you to manage follow-up for that message.</label>
+    <spacer flex="1"/>
+    <label>2.) You can use shortcut keys to manage follow ups. More info in the extension description.</label>
+    <spacer flex="1"/>
+    <label>3.) Use the tags button in the quick filter bar to easily view follow ups.</label>
+    <spacer flex="2"/>
+  </wizardpage>
 </wizard>
