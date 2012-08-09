@@ -11,8 +11,8 @@
    <script type="application/javascript" src="chrome://follow_up_ext/content/date_dialog.js"/>
     
     <dialogheader title="Date Option" description="  Select a date below:"/>
-    <groupbox>
+    <groupbox id="datepickerGroupbox">
       <caption label="Follow Up On"/>
-      <datepicker id="selDate" type="grid" />
    </groupbox>
+   <script type="application/javascript">insertDatepicker();</script>
 </dialog>
